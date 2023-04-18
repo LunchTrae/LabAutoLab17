@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Lab17"
         mc:Ignorable="d"
-        Title="MainWindow" Height="393" Width="667" ResizeMode="NoResize" Loaded="Root_Loaded">
+        Title="MainWindow" Height="393" Width="667" ResizeMode="NoResize" Loaded="Root_Loaded" Closing="Root_Closing">
     <Grid>
         <ComboBox x:Name="cboGPIB" HorizontalAlignment="Left" Margin="116,19,0,0" VerticalAlignment="Top" Width="120"/>
         <ComboBox x:Name="cboDevice" HorizontalAlignment="Left" Margin="116,46,0,0" VerticalAlignment="Top" Width="120"/>

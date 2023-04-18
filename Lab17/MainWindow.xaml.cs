@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using NationalInstruments.NI4882;
 
 namespace Lab17
 {
@@ -21,6 +22,7 @@ namespace Lab17
     /// </summary>
     public partial class MainWindow : Window
     {
+        private Device device;
         public MainWindow()
         {
             InitializeComponent();
@@ -45,6 +47,7 @@ namespace Lab17
 
         private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
+            // Component Control
             btnOpen.IsEnabled = false;
             btnClose.IsEnabled = true;
             rbn196.IsEnabled = false;
@@ -53,9 +56,18 @@ namespace Lab17
             cboGPIB.IsEnabled = false;
             btnRead.IsEnabled = true;
 
+            // Device Setup
+            int boardNumber = Convert.ToInt32(cboGPIB.SelectedIndex);
+            int boardAddress = Convert.ToInt32(cboDevice.SelectedIndex);
+            device = new Device(boardNumber, (byte)boardAddress);
+
             if(rbn196.IsChecked == true)
             {
-                
+                //device.Write("F0X"); // DC Volts
+                //device.Write("B1X"); // Readings from data store
+                //device.Write("I100X"); // Data store of n
+                //device.Write("")
+                //device.Write("G5X"); // Buffer readings without prefixes and without buffer locations
             }
             else
             {
@@ -72,16 +84,22 @@ namespace Lab17
             cboDevice.IsEnabled = true;
             cboGPIB.IsEnabled = true;
             btnRead.IsEnabled = false;
+            device.Dispose();
         }
 
         private void btnRead_Click(object sender, RoutedEventArgs e)
         {
-
+            lstData.Items.Add(device.ReadString());
         }
 
         private void btnClear_Click(object sender, RoutedEventArgs e)
         {
+            lstData.Items.Clear();
+        }
 
+        private void Root_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            device.Dispose();
         }
     }
 }
