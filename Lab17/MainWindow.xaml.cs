@@ -77,7 +77,11 @@ namespace Lab17
             {
                 device.Write("*RST");
                 device.Write(":SENSE:FUNC \"VOLT:DC\"");
-                device.Write(":TRIGGER:COUNT 100");
+                device.Write(":SENSE:VOLT:DC:RANG:AUTO ON");
+                device.Write(":TRAC:POIN 100");
+                device.Write(":TRIG:COUN 100");
+                device.Write(":TRIG:DEL 0.05");
+                device.Write(":TRIG:SOUR BUS");
             }
         }
 
