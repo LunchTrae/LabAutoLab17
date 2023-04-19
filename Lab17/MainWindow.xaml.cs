@@ -42,7 +42,7 @@ namespace Lab17
             {
                 cboDevice.Items.Add(i.ToString());
             }
-            cboDevice.SelectedIndex = 0;
+            cboDevice.SelectedIndex = 16;
         }
 
         private void btnOpen_Click(object sender, RoutedEventArgs e)
@@ -63,15 +63,21 @@ namespace Lab17
 
             if(rbn196.IsChecked == true)
             {
-                //device.Write("F0X"); // DC Volts
-                //device.Write("B1X"); // Readings from data store
-                //device.Write("I100X"); // Data store of n
-                //device.Write("")
-                //device.Write("G5X"); // Buffer readings without prefixes and without buffer locations
+                device.Write("L0X");    // Default Conditions:     Start from factory default conditions
+                device.Write("F0X");    // Function Mode:          DC Volts
+                device.Write("R0X");    // Range:                  Auto
+                device.Write("S3X");    // Rate:                   6 1/2 d
+                device.Write("G2X");    // Data Format:            Buffer readings with prefixes and buffer locations
+                device.Write("Q50X");   // Data Store Interval:    50ms
+                device.Write("T4X");    // Trigger Mode:           Continuous on X
+                device.Write("I100X");  // Data Store Size:        Data store of 100
+                device.Write("B1X");    // Reading Mode:           Readings from data store
             }
             else
             {
-                
+                device.Write("*RST");
+                device.Write(":SENSE:FUNC \"VOLT:DC\"");
+                device.Write(":TRIGGER:COUNT 100");
             }
         }
 
@@ -89,7 +95,35 @@ namespace Lab17
 
         private void btnRead_Click(object sender, RoutedEventArgs e)
         {
-            lstData.Items.Add(device.ReadString());
+            try
+            {
+                if (rbn196.IsChecked == true)
+                {
+                    device.Write("I0X");
+                    device.Write("I100X");
+                    string inData = device.ReadString();
+                    inData = inData + device.ReadString();
+                    inData = inData + device.ReadString();
+
+                    string[] dataPoints = inData.Split(',');
+
+                    for (int i = 0; i < dataPoints.Length; i = i + 2)
+                    {
+                        dataPoints[i] = dataPoints[i] + "," + dataPoints[i + 1];
+                        lstData.Items.Add(dataPoints[i]);
+                    }
+                    lstData.SelectedIndex = lstData.Items.Count - 1;
+                    lstData.ScrollIntoView(lstData.Items[lstData.Items.Count - 1]);
+                }
+                else
+                {
+                    lstData.Items.Add(device.ReadString());
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private void btnClear_Click(object sender, RoutedEventArgs e)
