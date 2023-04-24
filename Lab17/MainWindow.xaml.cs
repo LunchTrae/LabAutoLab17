@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -79,9 +80,11 @@ namespace Lab17
                 device.Write(":SENSE:FUNC \"VOLT:DC\"");
                 device.Write(":SENSE:VOLT:DC:RANG:AUTO ON");
                 device.Write(":TRAC:POIN 100");
-                device.Write(":TRIG:COUN 100");
+                device.Write(":TRIG:COUN 1");
+                device.Write(":SAMPLE:COUNT 100");
+                device.Write("TRAC:FEED:CONT NEXT");
                 device.Write(":TRIG:DEL 0.05");
-                device.Write(":TRIG:SOUR BUS");
+                device.Write(":TRIG:SOUR IMM");
             }
         }
 
@@ -103,8 +106,10 @@ namespace Lab17
             {
                 if (rbn196.IsChecked == true)
                 {
-                    device.Write("I0X");
-                    device.Write("I100X");
+                    // Clear the buffer
+                    device.Write("I0X"); // Set buffer size to 0
+                    device.Write("I100X"); // Set buffer size to 100. 
+
                     string inData = device.ReadString();
                     inData = inData + device.ReadString();
                     inData = inData + device.ReadString();
@@ -116,13 +121,23 @@ namespace Lab17
                         dataPoints[i] = dataPoints[i] + "," + dataPoints[i + 1];
                         lstData.Items.Add(dataPoints[i]);
                     }
-                    lstData.SelectedIndex = lstData.Items.Count - 1;
-                    lstData.ScrollIntoView(lstData.Items[lstData.Items.Count - 1]);
                 }
                 else
                 {
-                    lstData.Items.Add(device.ReadString());
+                    // Clear buffer
+                    device.Write(":TRAC:CLE");
+                    device.Write(":INIT");
+                    device.Write(":TRAC:DATA?");
+                    byte[] inByteData = device.ReadByteArray(1600);
+                    string inData = System.Text.Encoding.UTF8.GetString(inByteData, 0, inByteData.Length);
+                    string[] dataPoints = inData.Split(',');
+                    for (int i = 0; i < dataPoints.Length; i++)
+                    {
+                        lstData.Items.Add(dataPoints[i]);
+                    }
                 }
+                lstData.SelectedIndex = lstData.Items.Count - 1;
+                lstData.ScrollIntoView(lstData.Items[lstData.Items.Count - 1]);
             }
             catch(Exception ex)
             {
